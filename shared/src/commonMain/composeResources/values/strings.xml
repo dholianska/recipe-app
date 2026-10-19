@@ -1,0 +1,17 @@
+<resources>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get Started</string>
+
+    <string name="onboarding_title_1">Discover Delicious Recipes Every Day</string>
+    <string name="onboarding_desc_1">Explore thousands of curated chef recipes tailored to your taste.</string>
+
+    <string name="onboarding_title_2">Save Your Favorites</string>
+    <string name="onboarding_desc_2">Build your personal cookbook and add dishes to collections to access them anytime.</string>
+
+    <string name="onboarding_title_3">Cook Step by Step</string>
+    <string name="onboarding_desc_3">Follow simple guides with built-in timers and precise ingredient measurements.</string>
+
+    <string name="home_title">Recipes</string>
+    <string name="home_reset">Show onboarding again</string>
+</resources>

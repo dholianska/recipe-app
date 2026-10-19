@@ -1,0 +1,17 @@
+<resources>
+    <string name="onboarding_skip">Пропустити</string>
+    <string name="onboarding_next">Далі</string>
+    <string name="onboarding_start">Розпочати</string>
+
+    <string name="onboarding_title_1">Відкривайте смачні рецепти щодня</string>
+    <string name="onboarding_desc_1">Тисячі добірних рецептів від шефів, підібраних під ваш смак.</string>
+
+    <string name="onboarding_title_2">Зберігайте улюблене</string>
+    <string name="onboarding_desc_2">Створіть власну кулінарну книгу та додавайте страви до колекцій, щоб мати доступ до них будь-коли.</string>
+
+    <string name="onboarding_title_3">Готуйте крок за кроком</string>
+    <string name="onboarding_desc_3">Дотримуйтесь простих інструкцій із вбудованими таймерами та точними пропорціями інгредієнтів.</string>
+
+    <string name="home_title">Рецепти</string>
+    <string name="home_reset">Показати онбординг знову</string>
+</resources>
