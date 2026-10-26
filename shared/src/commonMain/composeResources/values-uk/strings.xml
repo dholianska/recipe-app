@@ -17,4 +17,16 @@
 
     <string name="home_title">Зміни</string>
     <string name="home_reset">Показати онбординг знову</string>
+
+    <string name="auth_title">З поверненням</string>
+    <string name="auth_subtitle">Увійдіть, щоб побачити свої волонтерські зміни.</string>
+    <string name="auth_username">Ім’я користувача</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_sign_in">Увійти</string>
+    <string name="auth_error_username_empty">Введіть ім’я користувача</string>
+    <string name="auth_error_username_short">Щонайменше 3 символи</string>
+    <string name="auth_error_password_empty">Введіть пароль</string>
+    <string name="auth_error_password_short">Щонайменше 6 символів</string>
+    <string name="home_sign_out">Вийти</string>
+
 </resources>

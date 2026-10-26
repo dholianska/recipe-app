@@ -17,4 +17,16 @@
 
     <string name="home_title">Shifts</string>
     <string name="home_reset">Show onboarding again</string>
+
+    <string name="auth_title">Welcome back</string>
+    <string name="auth_subtitle">Sign in to see your volunteer shifts.</string>
+    <string name="auth_username">Username</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_error_username_empty">Enter your username</string>
+    <string name="auth_error_username_short">At least 3 characters</string>
+    <string name="auth_error_password_empty">Enter your password</string>
+    <string name="auth_error_password_short">At least 6 characters</string>
+    <string name="home_sign_out">Sign out</string>
+
 </resources>

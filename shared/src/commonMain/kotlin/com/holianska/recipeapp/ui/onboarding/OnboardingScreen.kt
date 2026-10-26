@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import recipeapp.shared.generated.resources.*
+import org.koin.compose.viewmodel.koinViewModel
 
 private data class OnboardingPageData(
     val title: StringResource,
@@ -35,7 +36,28 @@ private data class OnboardingPageData(
     val accent: Int,
 )
 @Composable
-fun OnboardingScreen(onFinish: () -> Unit) {
+fun OnboardingScreen(
+    onFinish: () -> Unit,
+    viewModel: OnboardingViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                OnboardingEffect.Finished -> onFinish()
+            }
+        }
+    }
+
+    OnboardingContent(state = state, onIntent = viewModel::onIntent)
+}
+
+@Composable
+private fun OnboardingContent(
+    state: OnboardingState,
+    onIntent: (OnboardingIntent) -> Unit,
+) {
     val pages = remember {
         listOf(
             OnboardingPageData(Res.string.onboarding_title_1, Res.string.onboarding_desc_1,
@@ -47,8 +69,18 @@ fun OnboardingScreen(onFinish: () -> Unit) {
         )
     }
     val pagerState = rememberPagerState(pageCount = { pages.size })
-    val scope = rememberCoroutineScope()
-    val isLastPage = pagerState.currentPage == pages.lastIndex
+
+    // State → Pager: "Далі" у ViewModel гортає слайд
+    LaunchedEffect(state.currentPage) {
+        if (pagerState.currentPage != state.currentPage) {
+            pagerState.animateScrollToPage(state.currentPage)
+        }
+    }
+    // Pager → Intent: свайп користувача повідомляє ViewModel
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .collect { onIntent(OnboardingIntent.PageChanged(it)) }
+    }
 
     Column(
         modifier = Modifier
@@ -57,14 +89,12 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             .safeContentPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        // Кнопка "Пропустити" справа вгорі
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onFinish) {
+            TextButton(onClick = { onIntent(OnboardingIntent.Skip) }) {
                 Text(stringResource(Res.string.onboarding_skip))
             }
         }
 
-        // Сам Pager: гортається свайпом
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -72,7 +102,6 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             OnboardingPage(pages[page])
         }
 
-        // Крапки-індикатори
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center,
@@ -94,17 +123,13 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             }
         }
 
-        // Кнопка "Далі" / "Розпочати"
         Button(
-            onClick = {
-                if (isLastPage) onFinish()
-                else scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-            },
+            onClick = { onIntent(OnboardingIntent.Next) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
             Text(
                 text = stringResource(
-                    if (isLastPage) Res.string.onboarding_start else Res.string.onboarding_next
+                    if (state.isLastPage) Res.string.onboarding_start else Res.string.onboarding_next
                 ),
                 style = MaterialTheme.typography.titleMedium,
             )
