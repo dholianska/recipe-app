@@ -3,15 +3,18 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_start">Get Started</string>
 
-    <string name="onboarding_title_1">Discover Delicious Recipes Every Day</string>
-    <string name="onboarding_desc_1">Explore thousands of curated chef recipes tailored to your taste.</string>
+    <string name="onboarding_title_1">Find a shift near you</string>
+    <string name="onboarding_desc_1">Browse volunteer shifts by day and place, from food banks to community clean-ups.</string>
+    <string name="onboarding_title_2">Sign up in one tap</string>
+    <string name="onboarding_desc_2">See how many spots are left and claim yours before the shift fills up.</string>
+    <string name="onboarding_title_3">Track your impact</string>
+    <string name="onboarding_desc_3">Every completed shift adds to your hours, so you can see the difference you make.</string>
 
-    <string name="onboarding_title_2">Save Your Favorites</string>
-    <string name="onboarding_desc_2">Build your personal cookbook and add dishes to collections to access them anytime.</string>
+    <string name="shift_food">Food bank sorting</string>
+    <string name="shift_cleanup">Park clean-up</string>
+    <string name="shift_shelter">Animal shelter walk</string>
+    <string name="onboarding_spots">%1$d of %2$d volunteers</string>
 
-    <string name="onboarding_title_3">Cook Step by Step</string>
-    <string name="onboarding_desc_3">Follow simple guides with built-in timers and precise ingredient measurements.</string>
-
-    <string name="home_title">Recipes</string>
+    <string name="home_title">Shifts</string>
     <string name="home_reset">Show onboarding again</string>
 </resources>

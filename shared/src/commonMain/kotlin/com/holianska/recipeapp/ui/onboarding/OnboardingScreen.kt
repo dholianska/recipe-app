@@ -19,24 +19,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.LinearProgressIndicator
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import recipeapp.shared.generated.resources.*
 
 private data class OnboardingPageData(
-    val emoji: String,
     val title: StringResource,
     val description: StringResource,
+    val shiftTitle: StringResource,
+    val time: String,
+    val filled: Int,
+    val total: Int,
+    val accent: Int,
 )
-
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
     val pages = remember {
         listOf(
-            OnboardingPageData("🍲", Res.string.onboarding_title_1, Res.string.onboarding_desc_1),
-            OnboardingPageData("❤️", Res.string.onboarding_title_2, Res.string.onboarding_desc_2),
-            OnboardingPageData("⏲️", Res.string.onboarding_title_3, Res.string.onboarding_desc_3),
+            OnboardingPageData(Res.string.onboarding_title_1, Res.string.onboarding_desc_1,
+                Res.string.shift_food, "10:00 – 14:00", 3, 5, 0),
+            OnboardingPageData(Res.string.onboarding_title_2, Res.string.onboarding_desc_2,
+                Res.string.shift_cleanup, "09:00 – 12:00", 4, 5, 1),
+            OnboardingPageData(Res.string.onboarding_title_3, Res.string.onboarding_desc_3,
+                Res.string.shift_shelter, "16:00 – 18:00", 5, 5, 2),
         )
     }
     val pagerState = rememberPagerState(pageCount = { pages.size })
@@ -112,15 +119,7 @@ private fun OnboardingPage(page: OnboardingPageData) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .clip(RoundedCornerShape(40.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(page.emoji, fontSize = 88.sp)
-        }
+        ShiftMockCard(page)
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(page.title),
@@ -134,6 +133,44 @@ private fun OnboardingPage(page: OnboardingPageData) {
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun ShiftMockCard(page: OnboardingPageData) {
+    val accent = when (page.accent) {
+        0 -> MaterialTheme.colorScheme.primaryContainer
+        1 -> MaterialTheme.colorScheme.secondaryContainer
+        else -> MaterialTheme.colorScheme.tertiaryContainer
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(accent)
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = page.time,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = stringResource(page.shiftTitle),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+        )
+        LinearProgressIndicator(
+            progress = { page.filled / page.total.toFloat() },
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surface,
+        )
+        Text(
+            text = stringResource(Res.string.onboarding_spots, page.filled, page.total),
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }

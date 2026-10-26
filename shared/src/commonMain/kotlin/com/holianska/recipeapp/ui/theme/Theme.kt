@@ -18,22 +18,26 @@ import recipeapp.shared.generated.resources.plus_jakarta_sans_bold
 import org.jetbrains.compose.resources.Font as ResFont
 
 private val RecipeColors = lightColorScheme(
-    primary = Color(0xFFA63A00),            // темна "іржава" кнопка зі скріншотів
+    primary = Color(0xFF0F766E),
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFFFDACB),   // персикові плашки
-    onPrimaryContainer = Color(0xFF370E00),
-    secondary = Color(0xFFF97316),          // яскравий помаранчевий акцент
-    onSecondary = Color.White,
-    tertiary = Color(0xFF16A34A),           // зелений (Vegan, Saved Offline)
+    primaryContainer = Color(0xFFCCF1EC),
+    onPrimaryContainer = Color(0xFF00302C),
+    secondary = Color(0xFFF59E0B),
+    onSecondary = Color(0xFF2B1800),
+    secondaryContainer = Color(0xFFFFE9B8),
+    onSecondaryContainer = Color(0xFF3D2800),
+    tertiary = Color(0xFFE05A47),
     onTertiary = Color.White,
-    background = Color(0xFFFFEDE6),         // ваш фон
-    onBackground = Color(0xFF370E00),       // ваш текст
-    surface = Color(0xFFFFF8F5),
-    onSurface = Color(0xFF370E00),
-    surfaceVariant = Color(0xFFF5E4DD),
-    onSurfaceVariant = Color(0xFF5A4038),
-    outline = Color(0xFFC9A99C),
-    error = Color(0xFFB91C1C),
+    tertiaryContainer = Color(0xFFFFDAD4),
+    onTertiaryContainer = Color(0xFF410B03),
+    background = Color(0xFFF4FAF8),
+    onBackground = Color(0xFF10231F),
+    surface = Color.White,
+    onSurface = Color(0xFF10231F),
+    surfaceVariant = Color(0xFFE3EFEC),
+    onSurfaceVariant = Color(0xFF3F5550),
+    outline = Color(0xFFA7BDB7),
+    error = Color(0xFFB3261E),
 )
 
 @Composable
