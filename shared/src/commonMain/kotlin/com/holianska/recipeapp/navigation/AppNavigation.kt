@@ -15,7 +15,6 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
-// Перелік усіх маршрутів, які можуть опинитись у стеку
 private val navSavedStateConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
@@ -46,19 +45,14 @@ fun AppNavigation(startRoute: Route) {
             }
             entry<Route.Home> {
                 HomeScreen(
-                    onSignOut = { backStack.resetTo(Route.Auth) },
-                    onResetOnboarding = {
-                        // Скидання прапорця онбордингу виконується так само, як і раніше:
-                        // залиште тут той код, що був у вашій версії Home
-                        backStack.resetTo(Route.Onboarding)
-                    },
+                    onNavigateToAuth = { backStack.resetTo(Route.Auth) },
+                    onNavigateToOnboarding = { backStack.resetTo(Route.Onboarding) },
                 )
             }
         },
     )
 }
 
-// Повністю замінює стек, щоб "Назад" не повертав на попередній екран
 private fun MutableList<NavKey>.resetTo(route: Route) {
     clear()
     add(route)

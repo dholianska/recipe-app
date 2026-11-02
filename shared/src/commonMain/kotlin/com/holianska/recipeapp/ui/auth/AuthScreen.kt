@@ -2,6 +2,7 @@ package com.holianska.recipeapp.ui.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,13 +19,18 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
@@ -36,6 +43,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.holianska.recipeapp.domain.PasswordError
 import com.holianska.recipeapp.domain.UsernameError
+import com.holianska.recipeapp.domain.auth.LoginError
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -47,16 +55,40 @@ fun AuthScreen(
     viewModel: AuthViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Тексти беремо тут, бо stringResource можна викликати лише в composable-коді
+    val invalidCredentialsText = stringResource(Res.string.auth_error_invalid_credentials)
+    val networkText = stringResource(Res.string.auth_error_network)
+    val unknownText = stringResource(Res.string.auth_error_unknown)
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 AuthEffect.SignedIn -> onSignedIn()
+                is AuthEffect.ShowError -> {
+                    val message = when (effect.error) {
+                        LoginError.InvalidCredentials -> invalidCredentialsText
+                        LoginError.Network -> networkText
+                        LoginError.Unknown -> unknownText
+                    }
+                    snackbarHostState.showSnackbar(message)
+                }
             }
         }
     }
 
-    AuthContent(state = state, onIntent = viewModel::onIntent)
+    Box(Modifier.fillMaxSize()) {
+        AuthContent(state = state, onIntent = viewModel::onIntent)
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(16.dp),
+        )
+    }
 }
 
 @Composable
@@ -71,7 +103,6 @@ private fun AuthContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        // Кольорова шапка
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,7 +125,6 @@ private fun AuthContent(
             )
         }
 
-        // Форма
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,6 +138,7 @@ private fun AuthContent(
                 value = state.username,
                 onValueChange = { onIntent(AuthIntent.UsernameChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoading,
                 label = { Text(stringResource(Res.string.auth_username)) },
                 singleLine = true,
                 isError = state.usernameError != null,
@@ -120,7 +151,6 @@ private fun AuthContent(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next,
                 ),
-                // Next на полі імені → фокус переходить на пароль
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Next) }
                 ),
@@ -131,6 +161,7 @@ private fun AuthContent(
                 value = state.password,
                 onValueChange = { onIntent(AuthIntent.PasswordChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoading,
                 label = { Text(stringResource(Res.string.auth_password)) },
                 singleLine = true,
                 isError = state.passwordError != null,
@@ -142,7 +173,6 @@ private fun AuthContent(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done,
                 ),
-                // Done на полі пароля → та сама дія, що й кнопка "Увійти"
                 keyboardActions = KeyboardActions(
                     onDone = { onIntent(AuthIntent.SignIn) }
                 ),
@@ -153,12 +183,21 @@ private fun AuthContent(
 
             Button(
                 onClick = { onIntent(AuthIntent.SignIn) },
+                enabled = !state.isLoading,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
             ) {
-                Text(
-                    text = stringResource(Res.string.auth_sign_in),
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                } else {
+                    Text(
+                        text = stringResource(Res.string.auth_sign_in),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
             }
         }
     }

@@ -1,0 +1,21 @@
+package com.holianska.recipeapp.di
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import eu.anifantakis.lib.ksafe.KSafe
+import eu.anifantakis.lib.ksafe.KSafeConfig
+import java.io.File
+import org.koin.core.module.Module
+import org.koin.dsl.module
+
+@Composable
+actual fun rememberPlatformModule(): Module = remember {
+    module {
+        single {
+            KSafe(
+                baseDir = File(System.getProperty("user.home"), ".volunteer_shifts"),
+                config = KSafeConfig(appNamespace = "com.holianska.recipeapp"),
+            )
+        }
+    }
+}

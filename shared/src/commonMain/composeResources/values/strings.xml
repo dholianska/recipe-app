@@ -29,4 +29,11 @@
     <string name="auth_error_password_short">At least 6 characters</string>
     <string name="home_sign_out">Sign out</string>
 
+    <string name="auth_error_invalid_credentials">Incorrect username or password</string>
+    <string name="auth_error_network">No connection. Check your internet and try again.</string>
+    <string name="auth_error_unknown">Something went wrong. Please try again.</string>
+    <string name="home_greeting">Hello, %1$s!</string>
+    <string name="home_load_error">Couldn’t load your profile.</string>
+    <string name="home_retry">Try again</string>
+
 </resources>
