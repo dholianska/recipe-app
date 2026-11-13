@@ -1,13 +1,19 @@
 package com.holianska.recipeapp.ui.onboarding
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,13 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.material3.LinearProgressIndicator
-import kotlinx.coroutines.launch
+import com.holianska.recipeapp.ui.common.CenteredScrollColumn
+import com.holianska.recipeapp.ui.common.isTwoPaneLayout
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import recipeapp.shared.generated.resources.*
 import org.koin.compose.viewmodel.koinViewModel
+import recipeapp.shared.generated.resources.*
+
+private val TwoPaneCardMaxWidth = 420.dp
 
 private data class OnboardingPageData(
     val title: StringResource,
@@ -35,6 +42,7 @@ private data class OnboardingPageData(
     val total: Int,
     val accent: Int,
 )
+
 @Composable
 fun OnboardingScreen(
     onFinish: () -> Unit,
@@ -82,6 +90,25 @@ private fun OnboardingContent(
             .collect { onIntent(OnboardingIntent.PageChanged(it)) }
     }
 
+    val onNext = { onIntent(OnboardingIntent.Next) }
+    val onSkip = { onIntent(OnboardingIntent.Skip) }
+
+    if (isTwoPaneLayout()) {
+        OnboardingTwoPane(pages, pagerState, state.isLastPage, onNext, onSkip)
+    } else {
+        OnboardingSinglePane(pages, pagerState, state.isLastPage, onNext, onSkip)
+    }
+}
+
+// Вузький екран: усе в одну колонку (як було)
+@Composable
+private fun OnboardingSinglePane(
+    pages: List<OnboardingPageData>,
+    pagerState: PagerState,
+    isLastPage: Boolean,
+    onNext: () -> Unit,
+    onSkip: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,9 +117,7 @@ private fun OnboardingContent(
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = { onIntent(OnboardingIntent.Skip) }) {
-                Text(stringResource(Res.string.onboarding_skip))
-            }
+            SkipButton(onSkip)
         }
 
         HorizontalPager(
@@ -102,38 +127,146 @@ private fun OnboardingContent(
             OnboardingPage(pages[page])
         }
 
-        Row(
+        PageIndicator(
+            pageCount = pages.size,
+            currentPage = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            repeat(pages.size) { index ->
-                val selected = pagerState.currentPage == index
-                val width by animateDpAsState(if (selected) 28.dp else 8.dp)
-                Box(
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .height(8.dp)
-                        .width(width)
-                        .clip(CircleShape)
-                        .background(
-                            if (selected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outline
-                        )
+        )
+
+        NextButton(isLastPage = isLastPage, onClick = onNext, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+// Широкий екран: ліворуч Pager із картками, праворуч текст, крапки й кнопки
+@Composable
+private fun OnboardingTwoPane(
+    pages: List<OnboardingPageData>,
+    pagerState: PagerState,
+    isLastPage: Boolean,
+    onNext: () -> Unit,
+    onSkip: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .windowInsetsPadding(
+                    WindowInsets.safeContent.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical)
                 )
+                .padding(32.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.widthIn(max = TwoPaneCardMaxWidth).fillMaxWidth(),
+            ) { index ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    ShiftMockCard(pages[index])
+                }
             }
         }
 
-        Button(
-            onClick = { onIntent(OnboardingIntent.Next) },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-        ) {
-            Text(
-                text = stringResource(
-                    if (state.isLastPage) Res.string.onboarding_start else Res.string.onboarding_next
+        CenteredScrollColumn(
+            spacing = 24.dp,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .windowInsetsPadding(
+                    WindowInsets.safeContent.only(WindowInsetsSides.End + WindowInsetsSides.Vertical)
                 ),
-                style = MaterialTheme.typography.titleMedium,
+            contentPadding = PaddingValues(40.dp),
+        ) {
+            AnimatedContent(
+                targetState = pages[pagerState.currentPage],
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+            ) { page ->
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        text = stringResource(page.title),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = stringResource(page.description),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            PageIndicator(
+                pageCount = pages.size,
+                currentPage = pagerState.currentPage,
+                arrangement = Arrangement.Start,
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                NextButton(
+                    isLastPage = isLastPage,
+                    onClick = onNext,
+                    modifier = Modifier.widthIn(min = 200.dp),
+                )
+                SkipButton(onSkip)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PageIndicator(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier,
+    arrangement: Arrangement.Horizontal = Arrangement.Center,
+) {
+    Row(modifier = modifier, horizontalArrangement = arrangement) {
+        repeat(pageCount) { index ->
+            val selected = currentPage == index
+            val width by animateDpAsState(if (selected) 28.dp else 8.dp)
+            Box(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .height(8.dp)
+                    .width(width)
+                    .clip(CircleShape)
+                    .background(
+                        if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline
+                    )
             )
         }
+    }
+}
+
+@Composable
+private fun NextButton(
+    isLastPage: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(onClick = onClick, modifier = modifier.height(56.dp)) {
+        Text(
+            text = stringResource(
+                if (isLastPage) Res.string.onboarding_start else Res.string.onboarding_next
+            ),
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+private fun SkipButton(onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Text(stringResource(Res.string.onboarding_skip))
     }
 }
 
